@@ -78,8 +78,9 @@ Explication des difference entre BIOS et UEFI
 ### How operating systems are created?
 
 <!--
-Debian based, BSD based
+Debian based, BSD based, debootstrap, chroot
 LFS
+Bonus: /etc/passwd
 -->
 
 ## Virtualisation
@@ -188,6 +189,33 @@ Proto, REST
 <!--
 Protobuf
 -->
+
+## Technological focus
+
+<!--
+footer: Technological focus
+_footer: ""
+-->
+
+### Nginx
+
+### Docker
+
+### HAProxy
+
+### Proxmox
+
+### Nomad
+
+### Consul
+
+### Gitlab + Gitlab CI
+
+### Ceph / RBD / S3
+
+### Kernel building
+
+### iPXE
 
 ## Tutorials
 
