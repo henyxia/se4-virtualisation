@@ -9,6 +9,13 @@ _footer: ""
 headingDivider: 3
 ---
 
+<style>
+img[alt~="center"] {
+  display: block;
+  margin: 0 auto;
+}
+</style>
+
 # System, Network & Virtualisation
 
 ![bg left:35%](assets/intro.jpg)
@@ -34,6 +41,10 @@ Hobby         : House renovation / Climbing / Electronics & Computer Science
 Formation     : PolytechLille / IMA 2016
 ```
 
+### Disclamer
+
+![center](assets/work-in-progress.png)
+
 ### Plan
 
 <!--
@@ -45,6 +56,8 @@ Perimetre large: du demarrage d'un ordinateur au deploiement de services web
 - Virtualisation & containerisation
 - Infrastructure architecture
 - Networking & protocols
+- Focus on specific technologies
+- Tutorial introduction
 
 ## Simplified approach of modern operating systems
 
@@ -69,19 +82,65 @@ Explication des difference entre BIOS et UEFI
 
 ### What is a kernel?
 
+<!--
+Driver / Device initialization
+-->
+
+- Layer between physical components and userland
+- Expose high level API
+- Schedule processes
+- Manage memory
+- And much more!
+
+---
+
+![center height:600px](assets/linux-kernel-map.png)
+
 ### What is `init`?
+
+<!--
+Rappel sur execve
+-->
+
+- First program started by the kernel
+- Kernel switch to userland (`init`, `systemd-init`, `wininit.exe`)
+- Process ID `1`
+- Usually `execve` to a service manager
 
 ### How are services managed?
 
+<!--
+Explication de la reconciliation
+-->
+
+- Init starts a service manager (`systemd`, `openrc`, `svchost.exe`)
+- Can ensure reconciliation
+- Starts end user services (`nginx`, `sshd`, `kde4`)
+
 ### Login / Window manager
+
+<!--
+Bonus: /etc/passwd
+-->
+
+- Login manager: usually started by X11 or Wayland
+- Login manager: validates identity and starts window manager
+- Window manager: provides a graphical environment for users
+
+Notable WM: i3, Gnome, KDE
 
 ### How operating systems are created?
 
 <!--
-Debian based, BSD based, debootstrap, chroot
-LFS
-Bonus: /etc/passwd
+Debian based, BSD based, LFS
+TODO: debootstrap, chroot
 -->
+
+- Kernel, modular or monolithic
+- Initrd, containing temporary root system
+- Init and service manager
+- Package manager (`apt`, `yum`, `dnf`, `pacman`, `nuget`, `brew`)
+- Example of OS creation later in this presentation
 
 ## Virtualisation
 
@@ -92,15 +151,107 @@ _footer: ""
 
 ### What is virtualisation?
 
+Virtualization is a process allowing the share of hardware resources while ensuring an environment seperation.
+
+Three kind of virtualization:
+
+- Virtualization
+- Paravirtualization
+- Containerization
+
 ### Virtualisation
+
+- Virtualization consist of a lonely process
+- This process emulates a whole computer
+- The virtual machine is totally isolated from the host
+
+This whole computer emulation is named Virtual Machine.
+Or simply VM.
 
 ### Paravirtualisation
 
+- Paravirtualization also consist of a lonely process
+- This process also emulates a whole computer
+- The virtual machine is a little bit less isolated from the host (share CPU)
+
 ### Containerisation
+
+- Containerization also consist of a lonely process
+- This process just runs one software
+- The software is isolated from the host with namespaces
+
+### What is a container?
+
+- A container is an archive
+- It contains the minimal requirement to run one software
+- The process is isolated (only see itself) with the help of the host kernel
 
 ### Processes
 
+- Except init, all created by init or its child
+- Are referenced by their ID
+- In Linux, easily explorable through procfs
+
+### Processes (example)
+
+```bash
+henyxia@yggdrasil:~ pstree
+systemd─┬─ModemManager───2*[{ModemManager}]
+        ├─NetworkManager───2*[{NetworkManager}]
+        ├─alsactl
+        ├─auditd───{auditd}
+        ├─avahi-daemon───avahi-daemon
+        ├─bash───firefox─┬─RDD Process───3*[{RDD Process}]
+        │                ├─4*[Web Content───42*[{Web Content}]]
+        │                ├─Web Content───39*[{Web Content}]
+        │                └─80*[{firefox}]
+        ├─bash───pavucontrol───3*[{pavucontrol}]
+        ├─bash───spotify─┬─spotify───spotify───11*[{spotify}]
+        │                ├─2*[spotify───4*[{spotify}]]
+        │                └─29*[{spotify}]
+```
+
+### Processes (demo)
+
+<!--
+Transition:
+on a vu les process
+on sait que le noyau facilite la separation pour les container
+maintenant regardant comment
+-->
+
+_procfs exploration_
+
 ### Namespaces
+
+<!--
+explication des differents ns
+transition:
+avant de passer a la section suivante
+on peut se poser la question: pourquoi utiliser les container?
+-->
+
+- Namespaces are an isolation method given by the kernel
+- Way lighter than a full virtualization
+- Different kind of namespaces exists
+    - mnt, pid, net, ipc, uts, user, ...
+
+### Containers, why?
+
+<!--
+Explain isolation difference
+Explain "it works on my computer"
+-->
+
+- Lighter and faster than (para)virtualisation
+- Easily shareable (cf hub.docker.com)
+- Repeatable builds
+
+### Pet vs cattle principle
+
+- Servers are now generic, not unique anymore
+- Services are deployed identically everywhre
+- Making maintenance (and life) easier
 
 ## Infrastructure architecture
 
@@ -111,29 +262,144 @@ _footer: ""
 
 <!--
 How Spotify works?
+Several infrastructure architectural blocks
+That will be detailed now
 -->
 
 ### Docker
 
+<!--
+Emphasize on how docker changed the industry
+-->
+
+- Docker is containerization technology
+- It relies on two technologies:
+    - `libcontainerd` to manage container images
+    - `runc` to operate kernel namespaces
+
 ### Web servers
+
+<!--
+TODO: improve this slide
+Maybe add my contribution at OVH
+-->
+
+- Software that transmit web pages using the HTTP protocols
+
+Most known: Apache 2, Nginx, Caddy
 
 ### Proxy
 
+<!--
+TODO: improve this slide
+transition: maintenant la meme dans l'autre sens
+-->
+
+- Handle the HTTP query and return the result
+- Allow avoiding giving direct access to HTTP
+
+Most known: Apache 2, Squid
+
 ### Reverse proxy / Load balancers
 
-### Stateless / Statefull
+<!--
+dessin d'explication des LB/reverse
+detail du fonctionnement de HAProxy plus loin TODO
+-->
+
+- Accept incoming traffic
+- Transfer the request to another service
+- Distribute the load on these other services
+
+Most known: Apache 2, Nginx, HAProxy
+
+### Stateless / Stateful
+
+<!--
+donner des examples avec des logs et des bdd
+-->
+
+- Important distinction between container types
+- If persistence is needed: statefull
+- Stateless otherwise
 
 ### Network storages
 
+<!--
+as explained with pet vs cattle
+explain why we don't want local storage
+query mtbf of dd (2 to 5 years)
+explain different storage kinds
+Ceph will be detailed later
+-->
+
+- Allow writing remotely data
+- Allow data replication
+- Allow consistency assurance
+- Several kind: block, object and file
+
+Most known: Ceph, glusterfs, seaweedfs
+
 ### Databases
+
+<!--
+emphasize on stateful
+explain difference between rel and non-rel
+give my reco on those db
+-->
+
+- Two types: relational and non-relational
+- Mostly queried through the SQL language
+
+Most known: MySQL, PostgreSQL, sqlite3, MongoDB, CassandraDB
 
 ### Cache
 
+<!--
+varnish explain assets caching
+explain ORM
+-->
+
+- Many different types:
+    - Objects
+    - Key
+    - Session
+    - SQL preprocessing
+    - SQL results
+
+Most known: Varnish, Redis, Memcached
+
 ### Authentication
+
+<!--
+can be cascaded
+-->
+
+- Register user with its hierarchy
+- Allow grouping users
+- Validate identity
+
+Most known protocols: OAuth, SAML, LDAP
+Most known software: OAuth2proxy, Authelia, OpenLDAP
 
 ### Firewall
 
+<!--
+TODO: improve this slide
+-->
+
+- Restrict access between networks
+
+Most known: OPNsense, pfSense
+
 ### High availability
+
+<!--
+TODO: improve this slide
+-->
+
+- Avoid Single Point Of Failures
+- Ensure Service Liability Agreements
 
 ## Networking
 
@@ -290,3 +556,11 @@ Target: create a logging service
 
 22. Create a script / service that request user credentials, checks its validity against /etc/passwd, then mount dynamically user's home from rbd
 22. Improve script and update initrd to have a window manager starting after logging
+
+## Thank you for your attention
+
+<!--
+footer: ""
+-->
+
+##### If you have any question, feel free to ask!
