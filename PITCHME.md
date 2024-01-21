@@ -37,7 +37,7 @@ Yousign depuis 2 ans. Polytech depuis 5 ans.
 Name          : Jean Wasilewski
 Current work  : Yousign / PolytechLille
 Previous work : CNAMTS / Worldline / OVH / Scaleway
-Hobby         : House renovation / Climbing / Electronics & Computer Science
+Hobby         : DIY / Mechanic / Climbing / Electronics & Computer Science
 Formation     : PolytechLille / IMA 2016
 ```
 
@@ -50,6 +50,7 @@ Formation     : PolytechLille / IMA 2016
 <!--
 3 modules denses: virtualisation, administration des systems et reseaux et leur application
 Perimetre large: du demarrage d'un ordinateur au deploiement de services web
+Bonus: question random toutes les heures
 -->
 
 - Simplified approach of modern operating systems
@@ -410,51 +411,222 @@ _footer: ""
 
 ### OSI layers
 
+<!--
+Open Systems Interconnection models or layers
+-->
+
+- Conceptual model from ISO
+- Communcation between systems are split into 7 layers
+- Lower levels are closer to hardware / higher to end-user
+
+### OSI layers
+
+<!--
+1. 1000base-t / rs-232
+2. ethernet / arp
+3. ip / ipsec / icmp
+4. tcp / udp / quic
+5. sockets (session establishment of connected proto) / rpc
+6. ssl
+7. https / ftp / smtp
+-->
+
+![center height:500px](assets/osi-model.png)
+
 ### IP
 
 <!--
-Netmasks
+- small ipv4 history
+- nat introduction
+- private networks
+- communication types (unicast, multicast, broadcast)
+- explanation ip addresses and netmask calculation
+- do not omit ranges limitation (broadcast, reserved network)
 -->
+
+- Stands for Internel Protocol
+- Two versions: v4 & v6
+- Composed of addresses, netmask, networks and routes
 
 ### Routes
 
-### VLAN
-
 <!--
-802.1q
+- explanation of private and public networks
+- Local Area Network / Wide Area Network
+- Next: how to isolate lan? (firewall later, vlan now)
 -->
 
+- Are network with a gateway
+- Network can be public or private (see below)
+    - `192.168.0.0/16`
+    - `172.16.0.0/12`
+    - `10.0.0.0/8`
+- Examples:
+    - `10.12.14.0/24 via 172.17.0.22`
+    - `0.0.0.0/0 via 192.168.1.254`
+
+### 802.1q
+
+<!--
+- 802.3 -> Ethernet
+- Native, tagged
+- Swtich and routers
+-->
+
+- Network standard, also referred as Dot1q
+- Supports Virtual Local Area Networking
+- Represented by an ID between 1 to 4094
+
+![center width:1200px](assets/802.1Q.png)
+
 ### Bridge
+
+- Logical switch
+- Allow connecting multiple interfaces
+- Can have IP address, allowed and native VLAN
 
 ### High availability
 
 <!--
-LACP / ECMP
+- Pods through LB
+- LACP 802.3as + 802.1AX / ECMP
 -->
+
+- Everything that is not redundant is a SPOF
+- Almost every OSI layer can be redundant
+- Network example: failover (LACP) vs load balancing (ECMP)
 
 ### Firewall
 
 <!--
-NAT / iptables / nftables / ufw
+les experts miami
 -->
+
+![center width:900px](assets/firewall-1.webp)
+
+### Firewall
+
+<!--
+norse attack map
+https://threatmap.checkpoint.com/
+https://www.digitalattackmap.com/
+-->
+
+![center width:800px](assets/firewall-2.webp)
+
+### Firewall
+
+<!--
+Before going to the "real form` FW, let's see this overview
+No suck thing as "breaching" a firewall
+NAT / iptables / nftables / ufw
+DNAT / SNAT / Masquarade
+-->
+
+- Controlled by softwares like `iptables`, `nftables`, `ufw`
+- Composed of tables, chains and rules
+- Main tables: `filter` and `nat`
+- Main chains: `INPUT`, `FORWARD`, `OUTPUT`
+
+### Firewall
+
+![center width:1200px](assets/firewall-3.png)
 
 ### DHCP
 
+<!--
+- Proto: UDP
+- First 3 in broadcast
+- Last one in unicast
+-->
+
+- Layer 7 protocol
+- Used to assign dinamycally IPs
+- Composed of 4 messages
+    - `DISCOVER`
+    - `OFFER`
+    - `REQUEST`
+    - `ACKNOLEDGE`
+
 ### DNS
 
+<!--
+- Domain Name Server
+-->
+
+- Layer 7 protocol
+- Use to associate IP with FQDN (and vice versa)
+- Allow storing text with FQDN
+
+
+### DNS record types
+
+- A: Host address
+- AAAA: IPv6 host address
+- ALIAS: Auto resolved alias
+- CNAME: Canonical name for an alias
+- MX: Mail eXchange
+- NS: Name Server
+- TXT: text field
+
+### DNS common command
+
+```
+$ dig www.google.fr
+; <<>> DiG 9.11.13-RedHat-9.11.13-3.fc31 <<>> www.google.fr
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 47305
+;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+...snip...
+;; ANSWER SECTION:
+www.google.fr.      23  IN  A   216.58.198.195
+
+;; Query time: 8 msec
+;; SERVER: 192.168.255.10#53(192.168.255.10)
+;; WHEN: Mon Sep 21 22:19:29 CEST 2020
+;; MSG SIZE  rcvd: 58
+```
+
+### DNS common command (short)
+
+```
+henyxia@yggdrasil:~ dig +short www.google.fr
+216.58.198.195
+```
+
 ### SSH
+
+- Layer 7 protocol
+- Allow connection to a remote server securely
+- Uses key or password
 
 ### HTTP
 
 <!--
+Now ammended with more than 10 RFC
+Common status code / http://http.cat
+Request methods: OPTIONS GET HEAD POST PUT DELETE TRACE CONNECT PATCH
+Common headers: Cookie ETag Location HTTP referer DNT X-Forwarded-For
+Web API introduction
 Proto, REST
 -->
 
-### GRPC
+- Layer 7 protocol, defined by RFC1945 of the IETF
+- Used to communicate around Web pages
+- Widely used, also as base for other higher level protocols
+
+### gRPC
 
 <!--
-Protobuf
+Google Remote Procedure Calls
+Can be compatible with REST API
+Compressed by design, binary
 -->
+
+- Layer 7 protocol, initially developped by Google
+- Define messages through a dedicated language: Protocol Buffers
+- Ensure message structure, data format and type
 
 ## Technological focus
 
