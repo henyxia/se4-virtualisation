@@ -41,7 +41,7 @@ Hobby         : DIY / Mechanic / Climbing / Electronics & Computer Science
 Formation     : PolytechLille / IMA 2016
 ```
 
-### Disclamer
+### Disclaimer
 
 ![center](assets/work-in-progress.png)
 
@@ -134,7 +134,7 @@ Notable WM: i3, Gnome, KDE
 
 <!--
 Debian based, BSD based, LFS
-TODO: debootstrap, chroot
+TODO/technical-focus: debootstrap, chroot
 -->
 
 - Kernel, modular or monolithic
@@ -270,7 +270,8 @@ That will be detailed now
 ### Docker
 
 <!--
-Emphasize on how docker changed the industry
+- Emphasize on how docker changed the industry
+- Explain Docker images / networks / volume
 -->
 
 - Docker is containerization technology
@@ -281,31 +282,36 @@ Emphasize on how docker changed the industry
 ### Web servers
 
 <!--
-TODO: improve this slide
 Maybe add my contribution at OVH
 -->
 
 - Software that transmit web pages using the HTTP protocols
+- Understand HTTP request and respond with file content (HTML, CSS, JS, ...)
+- Relay to more complex language interpreter, like PHP
 
 Most known: Apache 2, Nginx, Caddy
 
 ### Proxy
 
 <!--
-TODO: improve this slide
-transition: maintenant la meme dans l'autre sens
+- security of proxies inside perimeters
+- legal aspect of proxies in universities
+
+Next slide: how about proxies, but in another way?
 -->
 
 - Handle the HTTP query and return the result
 - Allow avoiding giving direct access to HTTP
+- Typical use cases: restrained perimeter or universities
 
 Most known: Apache 2, Squid
 
 ### Reverse proxy / Load balancers
 
 <!--
-dessin d'explication des LB/reverse
-detail du fonctionnement de HAProxy plus loin TODO
+- Draw how LB / reverse proxy works
+- Explain differences between LB and RP
+TODO/technical-focus: how HAProxy works
 -->
 
 - Accept incoming traffic
@@ -385,22 +391,23 @@ Most known software: OAuth2proxy, Authelia, OpenLDAP
 
 ### Firewall
 
-<!--
-TODO: improve this slide
--->
-
 - Restrict access between networks
+- Can be software or hardware
+- More on that topic later!
 
 Most known: OPNsense, pfSense
 
 ### High availability
 
 <!--
-TODO: improve this slide
+- Draw eyeballs access to a website, all SPOF
+- Google SRE's approach of SLA
+- Talk about LB sawn earlier
 -->
 
 - Avoid Single Point Of Failures
 - Ensure Service Liability Agreements
+- More on that topic also later!
 
 ## Networking
 
