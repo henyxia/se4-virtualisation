@@ -472,6 +472,22 @@ Open Systems Interconnection models or layers
     - `10.12.14.0/24 via 172.17.0.22`
     - `0.0.0.0/0 via 192.168.1.254`
 
+### Particular networks
+
+<!--
+- loopback
+- cgnat
+- apipa
+- multicast
+- broadcast
+-->
+
+- `127.0.0.0/8`
+- `100.64.0.0/10`
+- `169.254.0.0/16`
+- `224.0.0.0/4`
+- `255.255.255.255/32`
+
 ### 802.1q
 
 <!--
@@ -487,6 +503,10 @@ Open Systems Interconnection models or layers
 ![center width:1200px](assets/802.1Q.png)
 
 ### Bridge
+
+<!--
+live example with several host / bridges
+-->
 
 - Logical switch
 - Allow connecting multiple interfaces
@@ -570,7 +590,6 @@ DNAT / SNAT / Masquarade
 
 - A: Host address
 - AAAA: IPv6 host address
-- ALIAS: Auto resolved alias
 - CNAME: Canonical name for an alias
 - MX: Mail eXchange
 - NS: Name Server
@@ -604,6 +623,11 @@ henyxia@yggdrasil:~ dig +short www.google.fr
 
 ### SSH
 
+<!--
+- key exchange technics
+- -l / -p / -J / -L / -R
+-->
+
 - Layer 7 protocol
 - Allow connection to a remote server securely
 - Uses key or password
@@ -617,6 +641,7 @@ Request methods: OPTIONS GET HEAD POST PUT DELETE TRACE CONNECT PATCH
 Common headers: Cookie ETag Location HTTP referer DNT X-Forwarded-For
 Web API introduction
 Proto, REST
+HTTPS
 -->
 
 - Layer 7 protocol, defined by RFC1945 of the IETF
@@ -644,23 +669,603 @@ _footer: ""
 
 ### Nginx
 
-### Docker
+- Web server / reverse proxy / load balancer written in C
+- Available on most Unix distributions
+- Allow to balance traffic and avoid downtime in case of failure
+
+<!--
+footer: Technological focus: Nginx
+-->
+
+---
+
+Main configuration
+
+```
+$ cat /etc/nginx/nginx.conf
+user www-data;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+http {
+    include /etc/nginx/mime.types;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+
+```
+
+---
+
+```
+$ cat /etc/nginx/sites-enabled/default
+
+server {
+    listen 8092 default_server;
+
+    root /var/www/mywebsite;
+
+    index index.html;
+
+    server_name _;
+
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri $uri/ =404;
+    }
+}
+```
+
+---
+
+<!--
+footer: Technological focus: Docker
+-->
+
+#### Pull an image
+
+<!--
+explain image, registry, tag
+-->
+
+```
+$ docker pull nginx:latest
+latest: Pulling from library/nginx
+b8f262c62ec6: Pull complete
+a6639d774c21: Pull complete
+22a7aa8442bf: Pull complete
+Digest: sha256:9688d0dae8812dd2437947b756393eb0779487e361aa2ffbc3a529dca61f102c
+Status: Downloaded newer image for nginx:latest
+```
+
+---
+
+#### List local images
+
+```
+$ docker image ls
+REPOSITORY                 TAG                      IMAGE ID            CREATED             SIZE
+debian                     stable-slim              da838f7eb4f8        11 days ago         69.2MB
+batman-dhcp                latest                   deb682e07fda        2 weeks ago         73.3MB
+rabbitmq                   3-management             d55229deb03e        8 weeks ago         187MB
+postgres                   11                       b7af9a7c9a68        3 months ago        282MB
+alpine                     latest                   a24bb4013296        3 months ago        5.57MB
+rabbitmq                   3.7-management           c497955c219a        4 months ago        180MB
+redis                      alpine                   29c713657d31        4 months ago        31.6MB
+golang                     1.13.11-buster           6a67120df3f4        4 months ago        803MB
+nginx                      alpine                   89ec9da68213        5 months ago        19.9MB
+djfarrelly/maildev         latest                   8c016b0ceb3c        14 months ago       79.8MB
+mysql                      5.6.43                   bc788a6a2745        18 months ago       256MB
+postgres                   10.2-alpine              400ef39e0dbf        2 years ago         39.5MB
+```
+
+---
+
+#### Delete local image
+
+```
+$ docker image rm 926fbd714c0e # also docker rmi debian:stable-slim
+Deleted: sha256:926fbd714c0e0ade9f56cfde5854b507e29dea584d747267a9d1fd92e4a21995
+Deleted: sha256:c086d58b3b8a851bb63694c637725d89b4bec9bf42bc22afbcea80e04d6248f6
+Deleted: sha256:de230fa08e61512837c758f79de4451b59aa7b35b059536ce8f092a798170341
+Deleted: sha256:cce1de5fafa9b555b784b8aceb95f04a84bb24170aa59a017cfd0acd62248e64
+Deleted: sha256:7bcfcbd4f645beaa4dc663a1c1d683e1eaf084c5a3a04ceeddd1ccd4a7ece044
+Deleted: sha256:874b3e23fbaf3e9c3c08b0c8b3130633f9fc1b91bf49a41540f28cfed7d916a2
+Deleted: sha256:4c07fcdde2c433bb04a6b989a78797648bf3603d4a1775c4719a6d18f08fbd27
+```
+
+---
+
+#### Start an image attached
+
+```
+$ docker run -it nginx:latest
+# detach with ^C-P ^C-Q
+```
+
+#### Start an image detached
+
+```
+$ docker run -d nginx:latest
+39a0263258f66217fc751aeb799b586d9d14b709f6d2a5dbd502afaa7e89b636
+```
+
+---
+
+#### List running containers
+
+```
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+b9568988ad7a        nginx:latest        "nginx -g 'daemon of…"   3 minutes ago       Up 3 minutes        80/tcp              agitated_feynman
+39a0263258f6        nginx:latest        "nginx -g 'daemon of…"   4 minutes ago       Up 4 minutes        80/tcp              suspicious_bardeen
+```
+
+#### List all containers
+
+```
+$ docker ps -a
+CONTAINER ID   IMAGE          COMMAND                  CREATED        STATUS                      PORTS      NAMES
+b9568988ad7a   nginx:latest   "nginx -g 'daemon of…"   3 minutes ago  Up 3 minutes                80/tcp     agitated_feynman
+39a0263258f6   nginx:latest   "nginx -g 'daemon of…"   4 minutes ago  Up 4 minutes                80/tcp     suspicious_bardeen
+92312d168d0c   40d3f3448412   "docker-entrypoint.s…"   3 days ago     Exited (1) 3 days ago                  agitated_mclaren
+dc4d33cd5968   b541f2080109   "/bin/sh"                7 weeks ago    Exited (0) 7 weeks ago                 tender_robinson
+c7dcaad6da50   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (0) 5 months ago                magical_mendeleev
+ccd5fa29a7a3   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (1) 5 months ago                eager_hopper
+6f29cade3b49   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (1) 5 months ago                wonderful_curie
+6d236e004fb1   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (1) 5 months ago                happy_elgamal
+373e6ee0ebee   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (1) 5 months ago                kind_shirley
+3203d2ce6fe1   8a503f628c40   "docker-entrypoint.s…"   5 months ago   Exited (1) 5 months ago                compassionate_mclaren
+```
+
+---
+
+#### Show logs of a container
+
+```
+$ docker logs 309fdd3451a9 # or agitated_feynman
+Initializing Gerrit site ...
+Generating SSH host key ... rsa... ed25519... ecdsa 256... ecdsa 384... ecdsa 521... done
+Initialized /var/gerrit
+Reindexing projects:    100% (2/2)
+Reindexed 2 documents in projects index in 0.3s (7.4/s)
+[2019-09-11 13:27:14,517] [main] INFO  com.google.gerrit.server.git.LocalDiskRepositoryManager : Defaulting core.streamFileThreshold to 866m
+[2019-09-11 13:27:15,890] [main] INFO  com.google.gerrit.server.cache.h2.H2CacheFactory : Enabling disk cache /var/gerrit/cache
+[2019-09-11 13:27:16,091] [main] INFO  com.google.gerrit.server.git.WorkQueue : Adding metrics for 'WorkQueue' queue
+[2019-09-11 13:27:16,108] [main] INFO  com.google.gerrit.server.git.WorkQueue : Adding metrics for 'Index-Interactive' queue
+[2019-09-11 13:27:16,117] [main] INFO  com.google.gerrit.server.git.WorkQueue : Adding metrics for 'Index-Batch' queue
+[2019-09-11 13:27:16,178] [main] INFO  com.google.gerrit.server.git.WorkQueue : Adding metrics for 'ReceiveCommits' queue
+[2019-09-11 13:27:16,179] [main] INFO  com.google.gerrit.server.git.WorkQueue : Adding metrics for 'SendEmail' queue
+[2019-09-11 13:27:16,259] [main] INFO  com.google.gerrit.server.rules.PrologEnvironment : reductionLimit: 100000, compileLimit: 1000000
+[2019-09-11 13:27:16,833] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loading plugins from /var/gerrit/plugins
+[2019-09-11 13:27:16,908] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin avatars-gravatar, version 381fc84a89
+[2019-09-11 13:27:16,941] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin codemirror-editor, version v3.0.1
+[2019-09-11 13:27:16,966] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin commit-message-length-validator, version v3.0.1
+[2019-09-11 13:27:16,995] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin delete-project, version v3.0.1
+[2019-09-11 13:27:17,026] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin download-commands, version v3.0.1
+[2019-09-11 13:27:17,065] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin gitiles, version v3.0.1
+[2019-09-11 13:27:17,094] [main] INFO  com.google.gerrit.server.plugins.PluginLoader : Loaded plugin hooks, version v3.0.1
+```
+
+---
+
+#### Stop a container
+
+```
+$ docker stop 39a0263258f6
+39a0263258f6
+```
+
+#### Delete a container
+
+```
+$ docker rm 39a0263258f6
+39a0263258f6
+```
+
+---
+
+#### Get container IP
+
+```
+$ docker inspect unruffled_goldstine |grep IP
+            "GlobalIPv6PrefixLen": 0,
+            "IPAddress": "100.64.0.2",
+            "IPPrefixLen": 24,
+            "IPv6Gateway": "",
+                    "IPAMConfig": null,
+                    "IPAddress": "100.64.0.2",
+                    "IPPrefixLen": 24,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+```
+
+---
+
+#### Execute another processus inside the container
+
+```
+$ docker exec -it unruffled_goldstine bash
+root@cb651a07bbde:/#
+```
+
+---
+
+#### Dockerfile
+
+<!--
+Description of how the image should be built
+-->
+
+```
+FROM php:7.3-fpm-buster
+RUN apt update && apt install -y --no-install-recommends wget curl git wget snmp unzip
+COPY ./docker/base/fpm/resources/php.ini /usr/local/etc/php/php.ini
+COPY ./docker/base/fpm/resources/entrypoint.sh /entrypoint
+USER www-data
+WORKDIR "/application"
+ENTRYPOINT ["/entrypoint"]
+```
+
+---
+
+#### Dockerfile builds
+
+```
+$ docker build -t my-image:v0.1 .
+Digest: sha256:0edcfe1b610d878c8fbc036bdc68380e0ca102be6a250d139c5bd3669ba63c10
+Sending build context to Docker daemon  56.14MB
+Step 1/15 : FROM php:7.3-fpm-buster
+7.3-fpm-buster: Pulling from library/php
+Digest: sha256:23b1ecb3e4144c132f126d7dd4dab1e8215e7645c690edef0a40964749d4500b
+Status: Image is up to date for php:7.3-fpm-buster
+ ---> d2f084c97289
+Step 2/15 : RUN apt update ...
+ ---> Using cache
+ ---> d131535f4e6d
+Step 3/15 : COPY ./docker/base/fpm/resources/php.ini /usr/local/etc/php/php.ini
+```
 
 ### HAProxy
 
+<!--
+footer: Technological focus: HAProxy
+-->
+
+#### What is HAProxy?
+
+- Load balancer written in C
+- Available on most Unix distributions
+- Allow to balance traffic and avoid downtime in case of failure
+
+---
+
+#### HAProxy configuration file
+
+- Located in `/etc/haproxy/haproxy.cfg`
+- Can be checked with `haproxy -c -f /etc/haproxy/haproxy.cfg`
+- Restart to apply a new configuration with `service haproxy restart`
+
+---
+
+#### `global` bloc
+
+```
+global
+        log /dev/log    local0
+        log /dev/log    local1 notice
+        chroot /var/lib/haproxy
+        stats socket /run/haproxy/admin.sock mode 660 level admin
+        stats timeout 30s
+        user haproxy
+        group haproxy
+        daemon
+
+        # Default SSL material locations
+        ca-base /etc/ssl/certs
+        crt-base /etc/ssl/private
+
+        # Default ciphers to use on SSL-enabled listening sockets.
+        # For more information, see ciphers(1SSL).
+        ssl-default-bind-ciphers kEECDH+aRSA+AES:kRSA+AES:+AES256:RC4-SHA:!kEDH:!LOW:!EXP:!MD5:!aNULL:!eNULL
+```
+
+---
+
+#### `defaults` bloc
+
+```
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        timeout connect 5000
+        timeout client  50000
+        timeout server  50000
+        errorfile 400 /etc/haproxy/errors/400.http
+        errorfile 403 /etc/haproxy/errors/403.http
+        errorfile 408 /etc/haproxy/errors/408.http
+        errorfile 500 /etc/haproxy/errors/500.http
+        errorfile 502 /etc/haproxy/errors/502.http
+        errorfile 503 /etc/haproxy/errors/503.http
+        errorfile 504 /etc/haproxy/errors/504.http
+```
+
+---
+
+#### `frontend` bloc
+
+```
+frontend localnodes
+    bind *:80
+    mode http
+    default_backend nodes
+
+    acl is_other_site hdr(host) -i www.my-other-site.com
+    use_backend nodes2 if is_other_site
+```
+
+---
+
+#### `backend` bloc
+
+```
+backend nodes
+    mode http
+    balance roundrobin
+    option httpchk HEAD / HTTP/1.1\r\nHost:localhost
+    server web01 127.0.0.1:9000 check
+    server web02 127.0.0.1:9001 check
+    server web03 127.0.0.1:9002 check
+
+backend nodes2
+    mode http
+    balance roundrobin
+    option httpchk HEAD / HTTP/1.1\r\nHost:localhost
+    default-server inter 2s fall 3 rise 2
+    server-template nodes 3 _website2._http.service.consul check resolvers my-resolvers resolve-opts allow-dup-ip resolve-prefer ipv4
+```
+
+---
+
+#### `listen` bloc
+
+```
+listen stats *:1936
+    stats enable
+    stats uri /
+    stats show-node
+    stats show-desc
+    stats show-legends
+    stats auth someuser:password
+```
+
+---
+
+#### `resolvers` bloc
+
+```
+resolvers my-resolvers
+    nameserver consul01 127.0.0.1:8600
+    resolve_retries 30
+    timeout retry 2s
+    hold valid 5s
+    accepted_payload_size 8192
+```
+
 ### Proxmox
+
+<!--
+footer: Technological focus
+-->
+
+What is Proxmox?
+
+- An operating system based on Debian
+- Can be installed on raw Debian
+- Create and manage containers and virtual machines
+- Gives tool allowing hot and cold migration of VMs
+- And many other features (like user/group management, HA and so on)
 
 ### Nomad
 
+<!--
+footer: Technological focus: Nomad
+-->
+
+#### What is Nomad?
+
+- Lightweight orchestrator written in Go by HashiCorp
+- Available on most Unix distributions
+- Allow to deploy containers accross multiple hosts
+
+---
+
+#### Nomad architecture
+
+- Nomad is separated in two roles: master and client
+- Masters receive order and transmit them to the clients
+- Masters ensure the order is respected as much as possible
+- In our scenario: the master is the client too
+
+---
+
+#### Nomad configuration files
+
+Separated according to their usage:
+
+- `/etc/nomad.d/base.hcl`
+- `/etc/nomad.d/client.hcl`
+- `/etc/nomad.d/server.hcl`
+
+---
+
+#### Nomad job definition
+
+`.job`
+
+```
+job "my-website" {
+  datacenters = ["dc1"]
+  type = "service"
+
+```
+
+---
+
+`.job.update` / `.job.migrate`
+```
+  update {
+    max_parallel = 1
+    min_healthy_time = "10s"
+    healthy_deadline = "3m"
+  }
+
+  migrate {
+    max_parallel = 1
+    health_check = "checks"
+    min_healthy_time = "10s"
+    healthy_deadline = "5m"
+  }
+```
+
+---
+
+`.job.group`
+
+```
+  group "web-app" {
+    count = 4
+
+```
+
+`.job.group.restart`
+
+```
+    restart {
+      attempts = 2
+      interval = "30m"
+      delay = "30s"
+      mode = "fail"
+    }
+```
+
+---
+
+`.job.group.network`
+
+```
+    network {
+      port "web" {
+        to = 8080
+      }
+    }
+```
+
+`.job.group.task`
+
+```
+    task "nginx" {
+      driver = "docker"
+```
+
+---
+
+`.job.group.task.config`
+```
+      config {
+        image = "registry-host:5000/myteam/my-image"
+        ports = ["web"]
+      }
+```
+
+`.job.group.task.resources`
+
+```
+      resources {
+        cpu    = 500
+        memory = 1024
+      }
+```
+
+---
+
+`.job.group.task.service`
+
+```
+      service {
+        name = "my-webapp"
+        tags = ["web"]
+        port = "web"
+        check {
+          name     = "alive"
+          type     = "tcp"
+          interval = "10s"
+          timeout  = "2s"
+        }
+      }
+    }
+  }
+}
+```
+
 ### Consul
 
+<!--
+footer: Technological focus: Consul
+-->
+
+#### What is Consul?
+
+- Lightweight K/V service registry tool written in Go by HashiCorp
+- Available on most Unix distributions
+- Allow to register service and key
+
+---
+
+#### Consul and DNS
+
+```
+$ dig @127.0.0.1 -p 8600 _my-webapp._web.service.consul SRV
+
+...
+
+;; ANSWER SECTION:
+_my-webapp._web.service.consul. 0 IN   SRV 1 1 30820 my-server01.node.dc1.consul.
+_my-webapp._web.service.consul. 0 IN   SRV 1 1 24464 my-server02.node.dc1.consul.
+
+;; ADDITIONAL SECTION:
+my-server01.node.dc1.consul. 0 IN A 10.0.0.1
+my-server01.node.dc1.consul. 0 IN TXT "consul-network-segment="
+my-server02.node.dc1.consul. 0 IN A 10.0.0.2
+my-server02.node.dc1.consul. 0 IN TXT "consul-network-segment="
+```
+
 ### Gitlab + Gitlab CI
+
+<!--
+footer: Technological focus
+-->
+
+TODO
 
 ### Ceph / RBD / S3
 
 ### Kernel building
 
+Live demo
+
 ### iPXE
+
+- Open source network boot firmware
+- Written in C in 2010
+- Allow higher level protocols for booting
 
 ## Tutorials
 
