@@ -1253,19 +1253,56 @@ my-server02.node.dc1.consul. 0 IN TXT "consul-network-segment="
 footer: Technological focus
 -->
 
-TODO
+```yaml
+variables:
+  NOMAD_ADDR: http://10.99.99.96:4646
+  docker_registry: 10.99.99.97:5000
+  docker_image: web-$VMID
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: docker
+  tags:
+    - docker
+  script:
+    - tag=${docker_registry}/${docker_image}:${CI_COMMIT_SHORT_SHA}
+    - echo "building and pushing tag $tag"
+    - docker build -t ${tag} -f Dockerfile .
+    - docker push ${tag}
+
+deploy:
+  stage: deploy
+  image: hendrikmaus/nomad-cli
+  tags:
+    - docker
+  script:
+    - apk add gettext
+    - envsubst '${CI_COMMIT_SHORT_SHA}' < project.nomad > job.nomad
+    - cat job.nomad
+    - nomad validate job.nomad
+    - nomad plan job.nomad || if [ $? -eq 255 ]; then exit 255; else echo "success"; fi
+    - nomad run job.nomad
+```
 
 ### Ceph / RBD / S3
 
-### Kernel building
-
-Live demo
+* Multiple file storage type
+* Several daemon (mon, osd, mgr, mds, ...)
+* Erasure coding or replication
 
 ### iPXE
 
 - Open source network boot firmware
 - Written in C in 2010
 - Allow higher level protocols for booting
+
+### Kernel building
+
+Live demo
 
 ## Tutorials
 
